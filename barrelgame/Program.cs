@@ -8,59 +8,60 @@ namespace barrelgame
 {
     class Program
     {
-        static void Main(string[] args)
+        public class Location
         {
-            RenderWorld(Map);
-            while (GameOn())
-            {
-                ConsoleKeyInfo direction = GetMove();
-                Location currentSpace = CurrentPlayerSpace();
-                Location nextSpace = GetNextSpace(currentSpace, direction);
-                if (IsMoveValid(nextSpace, direction))
-                {
-                   
-                   
-                    MovePiece(currentSpace, nextSpace, direction);
-                    RenderWorld(Map);
-                    Console.WriteLine(Score());
-
-                }
-               
-            }
-            Console.WriteLine("Congratulations, You win!");
-            Console.Read();
+            public int X { get; set; }
+            public int Y { get; set; }
         }
-        public static void RenderWorld(char[,] map)
+        public static char[,] Map =
+             {{'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ','o',' ',' ','o',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ','.',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ','.',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ','o',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','.',' ','#'},
+{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#'},
+{'#','@',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ','#'},
+{'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}};
+        public static bool GameOn()
         {
-            Console.Clear();
-            for (int i = 0; i < map.GetLength(0); i++)
+            if (CountPiece('o') == 0)
             {
-                for (int j = 0; j < map.GetLength(1); j++)
-                {
-                    Console.Write(map[i, j]);
-                }
-                Console.WriteLine();
+                return false;
             }
+            
+            return true;
+        }
+        public static int CountPiece(char piece)
+        {
+            int k = 0;
+            for (int i = 0; i < Map.GetLength(0); i++)
+            {
+                for (int j = 0; j < Map.GetLength(1); j++)
+                {
+                    if (Map[i, j] == piece)
+                    {
+                        k++;
+                    }
+                }
+            }
+            return k;
         }
         public static ConsoleKeyInfo GetMove()
         {
             var keypressed = System.Console.ReadKey(true);
             return keypressed;
-        }
-
-        public static void MovePiece(Location currentspace, Location nextlocation, ConsoleKeyInfo direction)
-        {
-            char[] nextmansymbol = GetNextSymbols(currentspace, nextlocation);
-            if (IsPushingBarrel(nextlocation))
-            {
-                Location nextBarrelSpace = GetNextSpace(nextlocation, direction);
-                char[] nextBarrelSymbol = GetNextSymbols(nextlocation, nextBarrelSpace);
-                Map[nextBarrelSpace.Y, nextBarrelSpace.X] = nextBarrelSymbol[1];
-            }
-           
-            Map[currentspace.Y, currentspace.X] = nextmansymbol[0];
-            Map[nextlocation.Y, nextlocation.X] = nextmansymbol[1];
-           
         }
         public static Location CurrentPlayerSpace()
         {
@@ -109,77 +110,12 @@ namespace barrelgame
             }
             return newlocation;
         }
-        public static bool IsPushingBarrel(Location nextlocation)
-        {
-            if (Map[nextlocation.Y, nextlocation.X] == 'o' || Map[nextlocation.Y, nextlocation.X] == '*') //check if pushing a barrel
-            {
-                return true;
-            }
-            return false;
-        }
-        private static char[] GetNextSymbols(Location currentspace, Location nextlocation)
-        {
-            //man moves from blank
-            if (Map[currentspace.Y, currentspace.X] == '@') 
-            {
-                if (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o')//man moves to blank
-                {
-                    return new char[] { ' ', '@' };
-                }
-                if (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*')//man moves to storage
-                {
-                    return new char[] { ' ', '+' };
-                }
-            }
-          
-            //man moves from storage
-            if (Map[currentspace.Y, currentspace.X] == '+')
-            {
-                if (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o')//man moves to blank
-                {
-                    return new char[] { '.', '@' };
-                }
-                if (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*')//man moves to storage
-                {
-                    return new char[] { '.', '+' };
-                }
-            }
-           
-            //barrel moves from blank
-            if ((Map[currentspace.Y, currentspace.X] == 'o') )
-            {
-                if (Map[nextlocation.Y, nextlocation.X] == ' ')//barrel moves to blank
-                {
-                    return new char[] { '@', 'o' };
-                }
-                if (Map[nextlocation.Y, nextlocation.X] == '.')//barrel moves to storage
-                {
-                    return new char[] { '@', '*' };
-                }
-            }
-           
-            //barrel moves from storage
-            if (Map[currentspace.Y, currentspace.X] == '*')
-            {
-                if (Map[nextlocation.Y, nextlocation.X] == ' ')//barrel moves to blank
-                {
-                    return new char[] { '+', 'o' };
-                }
-                if (Map[nextlocation.Y, nextlocation.X] == '.')//barrel moves to storage
-                {
-                    return new char[] { '+', '*' };
-                }
-            }
-          
-            return new char[] { ' ', ' ' };
-        }
         public static bool IsMoveValid(Location loc, ConsoleKeyInfo key)
         {
             if (loc.X >= Map.GetLength(1) || loc.Y >= Map.GetLength(0) || loc.X < 0 || loc.Y < 0 || Map[loc.Y, loc.X] == '#') //check out of bounds or a wall
             {
                 return false;
             }
-
             if (IsPushingBarrel(loc)) //check if pushing a barrel
             {
                 Location nextbarrelspace = new Location();
@@ -195,14 +131,62 @@ namespace barrelgame
             }
             return true;
         }
-      
-        public static bool GameOn()
+        public static void MovePiece(Location currentspace, Location nextlocation, ConsoleKeyInfo direction)
         {
-            if (CountPiece('o') == 0)
+            char[] nextmansymbol = GetNextSymbols(currentspace, nextlocation);
+            if (IsPushingBarrel(nextlocation))
             {
-                return false;
+                Location nextBarrelSpace = GetNextSpace(nextlocation, direction);
+                char nextBarrelSymbol = GetBarrelSymbol(nextBarrelSpace);
+                Map[nextBarrelSpace.Y, nextBarrelSpace.X] = nextBarrelSymbol;
             }
-            return true;
+            Map[currentspace.Y, currentspace.X] = nextmansymbol[0];
+            Map[nextlocation.Y, nextlocation.X] = nextmansymbol[1];
+        }
+        public static bool IsPushingBarrel(Location nextlocation)
+        {
+            if (Map[nextlocation.Y, nextlocation.X] == 'o' || Map[nextlocation.Y, nextlocation.X] == '*') //check if pushing a barrel
+            {
+                return true;
+            }
+            return false;
+        }
+        private static char[] GetNextSymbols(Location currentspace, Location nextlocation)
+        {
+            //man moves from blank
+            if (Map[currentspace.Y, currentspace.X] == '@')
+            {
+                if (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o')//man moves to blank
+                {
+                    return new char[] { ' ', '@' };
+                }
+                if (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*')//man moves to storage
+                {
+                    return new char[] { ' ', '+' };
+                }
+            }
+
+            //man moves from storage
+            if (Map[currentspace.Y, currentspace.X] == '+')
+            {
+                if (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o')//man moves to blank
+                {
+                    return new char[] { '.', '@' };
+                }
+                if (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*')//man moves to storage
+                {
+                    return new char[] { '.', '+' };
+                }
+            }
+            return new char[] { ' ', ' ' };
+        }
+        private static char GetBarrelSymbol(Location nextloc)
+        {
+            if (Map[nextloc.Y, nextloc.X] == '.')//barrel moves to storage
+            {
+                return '*';
+            }
+            return 'o';
         }
         public static string Score()
         {
@@ -211,48 +195,41 @@ namespace barrelgame
             int stored = CountPiece('*');
             return string.Format("You have {0} barrels to put away, {1} empty spots and {2} barrels stored!", barrels, spots, stored);
         }
-        public static int CountPiece(char piece)
+
+        static void Main(string[] args)
         {
-            int k = 0;
-            for (int i = 0; i < Map.GetLength(0); i++)
+            RenderWorld(Map);
+            while (GameOn())
             {
-                for (int j = 0; j < Map.GetLength(1); j++)
+                ConsoleKeyInfo direction = GetMove();
+                Location currentSpace = CurrentPlayerSpace();
+                Location nextSpace = GetNextSpace(currentSpace, direction);
+                if (IsMoveValid(nextSpace, direction))
                 {
-                    if (Map[i, j] == piece)
-                    
-                    {
-                        k++;
-                    }
+                    MovePiece(currentSpace, nextSpace, direction);
+                    RenderWorld(Map);
+                    Console.WriteLine(Score());
                 }
             }
-            return k;
+            Console.WriteLine("Congratulations, You win!");
+            Console.Read();
         }
-        public static char[,] Map =
-              {{'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ','o',' ',' ','o',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ','.',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ','.',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ','o',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','.',' ','#'},
-{'#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#'},
-{'#','@',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ','#'},
-{'#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#'}}
-;
-        public class Location
+        public static void RenderWorld(char[,] map)
         {
-            public int X { get; set; }
-            public int Y { get; set; }
+            Console.Clear();
+            for (int i = 0; i < map.GetLength(0); i++)
+            {
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    Console.Write(map[i, j]);
+                }
+                Console.WriteLine();
+            }
         }
     }
 }
+
+       
+            
+           
+      
