@@ -13,8 +13,19 @@ namespace barrelgame
             RenderWorld(Map);
             while (GameOn())
             {
-                GetMove();
-                Console.WriteLine(Score());
+                ConsoleKeyInfo direction = GetMove();
+                Location currentSpace = CurrentPlayerSpace();
+                Location nextSpace = GetNextSpace(currentSpace, direction);
+                if (IsMoveValid(nextSpace, direction))
+                {
+                   
+                   
+                    MovePiece(currentSpace, nextSpace, direction);
+                    RenderWorld(Map);
+                    Console.WriteLine(Score());
+
+                }
+               
             }
             Console.WriteLine("Congratulations, You win!");
             Console.Read();
@@ -31,32 +42,25 @@ namespace barrelgame
                 Console.WriteLine();
             }
         }
-        public static void GetMove()
+        public static ConsoleKeyInfo GetMove()
         {
             var keypressed = System.Console.ReadKey(true);
-
-            MovePiece(keypressed);
+            return keypressed;
         }
 
-        public static void MovePiece(ConsoleKeyInfo key)
+        public static void MovePiece(Location currentspace, Location nextlocation, ConsoleKeyInfo direction)
         {
-            Location currentspace = new Location();
-            currentspace = CurrentPlayerSpace();
-            Location nextlocation = new Location();
-            nextlocation = GetNextSpace(currentspace, key);
-            char[] nextsymbol = GetNextSymbols(currentspace, nextlocation);
-
-            if (IsMoveValid(nextlocation, key))
+            char[] nextmansymbol = GetNextSymbols(currentspace, nextlocation);
+            if (IsPushingBarrel(nextlocation))
             {
-               
-                if (Map[nextlocation.Y, nextlocation.X] == 'o' || Map[nextlocation.Y, nextlocation.X] == '*')
-                {
-                    MoveBarrel(nextlocation, key);
-                }
-                Map[currentspace.Y, currentspace.X] = nextsymbol[1];
-                Map[nextlocation.Y, nextlocation.X] = nextsymbol[0];
+                Location nextBarrelSpace = GetNextSpace(nextlocation, direction);
+                char[] nextBarrelSymbol = GetNextSymbols(nextlocation, nextBarrelSpace);
+                Map[nextBarrelSpace.Y, nextBarrelSpace.X] = nextBarrelSymbol[1];
             }
-            RenderWorld(Map);
+           
+            Map[currentspace.Y, currentspace.X] = nextmansymbol[0];
+            Map[nextlocation.Y, nextlocation.X] = nextmansymbol[1];
+           
         }
         public static Location CurrentPlayerSpace()
         {
@@ -105,6 +109,14 @@ namespace barrelgame
             }
             return newlocation;
         }
+        public static bool IsPushingBarrel(Location nextlocation)
+        {
+            if (Map[nextlocation.Y, nextlocation.X] == 'o' || Map[nextlocation.Y, nextlocation.X] == '*') //check if pushing a barrel
+            {
+                return true;
+            }
+            return false;
+        }
         private static char[] GetNextSymbols(Location currentspace, Location nextlocation)
         {
             //man moves from blank
@@ -112,11 +124,11 @@ namespace barrelgame
             {
                 if (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o')//man moves to blank
                 {
-                    return new char[] { '@', ' ' };
+                    return new char[] { ' ', '@' };
                 }
                 if (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*')//man moves to storage
                 {
-                    return new char[] { '+', ' ' };
+                    return new char[] { ' ', '+' };
                 }
             }
           
@@ -125,11 +137,11 @@ namespace barrelgame
             {
                 if (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o')//man moves to blank
                 {
-                    return new char[] { '@', '.' };
+                    return new char[] { '.', '@' };
                 }
                 if (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*')//man moves to storage
                 {
-                    return new char[] { '+', '.' };
+                    return new char[] { '.', '+' };
                 }
             }
            
@@ -138,11 +150,11 @@ namespace barrelgame
             {
                 if (Map[nextlocation.Y, nextlocation.X] == ' ')//barrel moves to blank
                 {
-                    return new char[] { 'o', '@' };
+                    return new char[] { '@', 'o' };
                 }
                 if (Map[nextlocation.Y, nextlocation.X] == '.')//barrel moves to storage
                 {
-                    return new char[] { '*', '@' };
+                    return new char[] { '@', '*' };
                 }
             }
            
@@ -151,11 +163,11 @@ namespace barrelgame
             {
                 if (Map[nextlocation.Y, nextlocation.X] == ' ')//barrel moves to blank
                 {
-                    return new char[] { 'o', '+' };
+                    return new char[] { '+', 'o' };
                 }
                 if (Map[nextlocation.Y, nextlocation.X] == '.')//barrel moves to storage
                 {
-                    return new char[] { '*', '+' };
+                    return new char[] { '+', '*' };
                 }
             }
           
@@ -168,7 +180,7 @@ namespace barrelgame
                 return false;
             }
 
-            if (Map[loc.Y, loc.X] == 'o' || Map[loc.Y, loc.X] == '*') //check if pushing a barrel
+            if (IsPushingBarrel(loc)) //check if pushing a barrel
             {
                 Location nextbarrelspace = new Location();
                 nextbarrelspace = GetNextSpace(loc, key);
@@ -183,14 +195,7 @@ namespace barrelgame
             }
             return true;
         }
-        public static void MoveBarrel(Location oldloc, ConsoleKeyInfo key)
-        {
-            Location nextloc = new Location();
-            nextloc = GetNextSpace(oldloc, key);
-            var barrel = GetNextSymbols(oldloc, nextloc);
-            Map[oldloc.Y, oldloc.X] = barrel[1];
-            Map[nextloc.Y, nextloc.X] = barrel[0];
-        }
+      
         public static bool GameOn()
         {
             if (CountPiece('o') == 0)
