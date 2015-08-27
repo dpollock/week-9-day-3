@@ -11,10 +11,13 @@ namespace barrelgame
         static void Main(string[] args)
         {
             RenderWorld(Map);
-            while (true)
+            while (GameOn())
             {
                 GetMove();
+                Console.WriteLine(Score());
             }
+            Console.WriteLine("Congratulations, You win!");
+            Console.Read();
         }
         public static void RenderWorld(char[,] map)
         {
@@ -188,14 +191,46 @@ namespace barrelgame
             Map[oldloc.Y, oldloc.X] = barrel[1];
             Map[nextloc.Y, nextloc.X] = barrel[0];
         }
+        public static bool GameOn()
+        {
+            if (CountPiece('o') == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+        public static string Score()
+        {
+            int barrels = CountPiece('o');
+            int spots = CountPiece('.');
+            int stored = CountPiece('*');
+            return string.Format("You have {0} barrels to put away, {1} empty spots and {2} barrels stored!", barrels, spots, stored);
+        }
+        public static int CountPiece(char piece)
+        {
+            int k = 0;
+            for (int i = 0; i < Map.GetLength(0); i++)
+            {
+                for (int j = 0; j < Map.GetLength(1); j++)
+                {
+                    if (Map[i, j] == piece)
+                    
+                    {
+                        k++;
+                    }
+                }
+            }
+            return k;
+        }
         public static char[,] Map =
                {
-                { '#','#','#','#','#','#' },
-                {  '#',' ', ' ',' ',' ','#'},
-                {  '#','o', '@','.',' ','#'},
-                {  '#',' ', ' ',' ',' ','#'},
-                 {  '#',' ', ' ',' ',' ','#'},
-                { '#','#','#','#','#','#' }
+                { '#','#','#','#','#','#','#' },
+                {  '#',' ',' ', ' ',' ',' ','#'},
+                {  '#',' ','o', '@','.',' ','#'},
+               {  '#',' ',' ', ' ',' ',' ','#'},
+                {  '#',' ',' ', ' ',' ',' ','#'},
+                 {  '#',' ',' ', ' ',' ',' ','#'},
+                { '#','#','#','#','#','#','#' }
             };
         public class Location
         {
