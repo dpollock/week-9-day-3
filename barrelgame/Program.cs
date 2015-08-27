@@ -19,9 +19,9 @@ namespace barrelgame
         public static void RenderWorld(char[,] map)
         {
             Console.Clear();
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < map.GetLength(0); i++)
             {
-                for (int j = 0; j < 5; j++)
+                for (int j = 0; j < map.GetLength(1); j++)
                 {
                     Console.Write(map[i, j]);
                 }
@@ -45,9 +45,10 @@ namespace barrelgame
 
             if (IsMoveValid(nextlocation, key))
             {
+               
                 if (Map[nextlocation.Y, nextlocation.X] == 'o' || Map[nextlocation.Y, nextlocation.X] == '*')
                 {
-                    MoveBarrel(nextlocation, currentspace);
+                    MoveBarrel(nextlocation, key);
                 }
                 Map[currentspace.Y, currentspace.X] = nextsymbol[1];
                 Map[nextlocation.Y, nextlocation.X] = nextsymbol[0];
@@ -56,9 +57,9 @@ namespace barrelgame
         }
         public static Location CurrentPlayerSpace()
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < Map.GetLength(0); i++)
             {
-                for (int j = 0; j < 5; j++)
+                for (int j = 0; j < Map.GetLength(1); j++)
                 {
                     if (Map[i, j] == '@'
                     || Map[i, j] == '+')
@@ -103,51 +104,63 @@ namespace barrelgame
         }
         private static char[] GetNextSymbols(Location currentspace, Location nextlocation)
         {
-            //man moves from blank to blank
-            if ((Map[currentspace.Y, currentspace.X] == '@') &&(Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o'))
+            //man moves from blank
+            if (Map[currentspace.Y, currentspace.X] == '@') 
+            {
+                if (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o')//man moves to blank
                 {
-                return new char[] { '@', ' ' };
+                    return new char[] { '@', ' ' };
                 }
-            //man moves from blank to storage
-            if ((Map[currentspace.Y, currentspace.X] == '@') && (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*'))
-            {
-                return new char[] { '+', ' '};
+                if (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*')//man moves to storage
+                {
+                    return new char[] { '+', ' ' };
                 }
-            //man moves from storage to storage
-            if ((Map[currentspace.Y, currentspace.X] == '+') && (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*'))
-            {
-                return new char[] { '+', '.' };
             }
-            //man moves from storage to blank
-            if ((Map[currentspace.Y, currentspace.X] == '+') && (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o'))
+          
+            //man moves from storage
+            if (Map[currentspace.Y, currentspace.X] == '+')
             {
-                return new char[] { '@', ' ' };
+                if (Map[nextlocation.Y, nextlocation.X] == ' ' || Map[nextlocation.Y, nextlocation.X] == 'o')//man moves to blank
+                {
+                    return new char[] { '@', '.' };
+                }
+                if (Map[nextlocation.Y, nextlocation.X] == '.' || Map[nextlocation.Y, nextlocation.X] == '*')//man moves to storage
+                {
+                    return new char[] { '+', '.' };
+                }
             }
-            //barrel moves from blank to blank
-            if ((Map[currentspace.Y, currentspace.X] == 'o') && (Map[nextlocation.Y, nextlocation.X] == ' '))
+           
+            //barrel moves from blank
+            if ((Map[currentspace.Y, currentspace.X] == 'o') )
             {
-                return new char[]{ 'o', '@'};
+                if (Map[nextlocation.Y, nextlocation.X] == ' ')//barrel moves to blank
+                {
+                    return new char[] { 'o', '@' };
+                }
+                if (Map[nextlocation.Y, nextlocation.X] == '.')//barrel moves to storage
+                {
+                    return new char[] { '*', '@' };
+                }
             }
-            //barrel moves from blank to storage
-            if ((Map[currentspace.Y, currentspace.X] == ' ') && (Map[nextlocation.Y, nextlocation.X] == '.'))
+           
+            //barrel moves from storage
+            if (Map[currentspace.Y, currentspace.X] == '*')
             {
-                return new char[]{ '*', '@'};
+                if (Map[nextlocation.Y, nextlocation.X] == ' ')//barrel moves to blank
+                {
+                    return new char[] { 'o', '+' };
+                }
+                if (Map[nextlocation.Y, nextlocation.X] == '.')//barrel moves to storage
+                {
+                    return new char[] { '*', '+' };
+                }
             }
-            //barrel moves from storage to storage
-            if ((Map[currentspace.Y, currentspace.X] == '*') && (Map[nextlocation.Y, nextlocation.X] == '.'))
-            {
-                return new char[] { '*', '+' };
-            }
-            //barrel moves from storage to blank
-            if ((Map[currentspace.Y, currentspace.X] == '*') && (Map[nextlocation.Y, nextlocation.X] == ' '))
-            {
-                return new char[] { 'o', '+' };
-            }
-            else return new char[] { ' ', ' ' };
+          
+            return new char[] { ' ', ' ' };
         }
         public static bool IsMoveValid(Location loc, ConsoleKeyInfo key)
         {
-            if (loc.X >= 5 || loc.Y >= 5 || loc.X < 0 || loc.Y < 0 || Map[loc.Y, loc.X] == '#') //check out of bounds or a wall
+            if (loc.X >= Map.GetLength(1) || loc.Y >= Map.GetLength(0) || loc.X < 0 || loc.Y < 0 || Map[loc.Y, loc.X] == '#') //check out of bounds or a wall
             {
                 return false;
             }
@@ -160,26 +173,29 @@ namespace barrelgame
                     || Map[nextbarrelspace.Y, nextbarrelspace.X] == '#' //barrel against wall
                     || Map[nextbarrelspace.Y, nextbarrelspace.X] == '*' //barrel pushing barrel
                     || nextbarrelspace.X < 0 || nextbarrelspace.Y < 0 //barrel out of bounds
-                    || nextbarrelspace.X >= 5 || nextbarrelspace.Y >= 5)
+                    || nextbarrelspace.X >= Map.GetLength(1) || nextbarrelspace.Y >= Map.GetLength(0))
                 {
                     return false;
                 }
             }
             return true;
         }
-        private static void MoveBarrel(Location nextloc, Location oldloc)
+        public static void MoveBarrel(Location oldloc, ConsoleKeyInfo key)
         {
+            Location nextloc = new Location();
+            nextloc = GetNextSpace(oldloc, key);
             var barrel = GetNextSymbols(oldloc, nextloc);
             Map[oldloc.Y, oldloc.X] = barrel[1];
             Map[nextloc.Y, nextloc.X] = barrel[0];
         }
         public static char[,] Map =
                {
-                { '#','#','#','#','#' },
-                {  '#',' ', ' ',' ','#'},
-                {  '#','o', '@','.','#'},
-                {  '#',' ', ' ',' ','#'},
-                { '#','#','#','#','#' }
+                { '#','#','#','#','#','#' },
+                {  '#',' ', ' ',' ',' ','#'},
+                {  '#','o', '@','.',' ','#'},
+                {  '#',' ', ' ',' ',' ','#'},
+                 {  '#',' ', ' ',' ',' ','#'},
+                { '#','#','#','#','#','#' }
             };
         public class Location
         {
