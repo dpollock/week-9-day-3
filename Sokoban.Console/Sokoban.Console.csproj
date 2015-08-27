@@ -43,8 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleGameRender.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="IGameRender.cs" />
+    <Compile Include="IInputHandler.cs" />
+    <Compile Include="IMapLoader.cs" />
+    <Compile Include="ConsoleInputHandler.cs" />
+    <Compile Include="Point.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tile.cs" />
+    <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
