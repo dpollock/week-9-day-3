@@ -95,7 +95,7 @@ namespace barrelgame
 
                 case ConsoleKey.RightArrow:
                     newlocation.X = oldlocation.X + 1;
-                    newlocation.Y = oldlocation.Y;
+                    newlocation.Y = oldlocation.Y; 
                     break;
 
                 case ConsoleKey.UpArrow:
@@ -118,8 +118,7 @@ namespace barrelgame
             }
             if (IsPushingBarrel(loc)) //check if pushing a barrel
             {
-                Location nextbarrelspace = new Location();
-                nextbarrelspace = GetNextSpace(loc, key);
+                Location nextbarrelspace = GetNextSpace(loc, key);
                 if (Map[nextbarrelspace.Y, nextbarrelspace.X] == 'o' //barrel pushing barrel
                     || Map[nextbarrelspace.Y, nextbarrelspace.X] == '#' //barrel against wall
                     || Map[nextbarrelspace.Y, nextbarrelspace.X] == '*' //barrel pushing barrel
@@ -131,15 +130,9 @@ namespace barrelgame
             }
             return true;
         }
-        public static void MovePiece(Location currentspace, Location nextlocation, ConsoleKeyInfo direction)
+        public static void MovePiece(Location currentspace, Location nextlocation)
         {
             char[] nextmansymbol = GetNextSymbols(currentspace, nextlocation);
-            if (IsPushingBarrel(nextlocation))
-            {
-                Location nextBarrelSpace = GetNextSpace(nextlocation, direction);
-                char nextBarrelSymbol = GetBarrelSymbol(nextBarrelSpace);
-                Map[nextBarrelSpace.Y, nextBarrelSpace.X] = nextBarrelSymbol;
-            }
             Map[currentspace.Y, currentspace.X] = nextmansymbol[0];
             Map[nextlocation.Y, nextlocation.X] = nextmansymbol[1];
         }
@@ -150,6 +143,11 @@ namespace barrelgame
                 return true;
             }
             return false;
+        }
+        public static void PushBarrel(Location nextBarrelSpace)
+        {
+            char nextBarrelSymbol = GetBarrelSymbol(nextBarrelSpace);
+            Map[nextBarrelSpace.Y, nextBarrelSpace.X] = nextBarrelSymbol;
         }
         private static char[] GetNextSymbols(Location currentspace, Location nextlocation)
         {
@@ -204,11 +202,22 @@ namespace barrelgame
                 ConsoleKeyInfo direction = GetMove();
                 Location currentSpace = CurrentPlayerSpace();
                 Location nextSpace = GetNextSpace(currentSpace, direction);
+               
+                
                 if (IsMoveValid(nextSpace, direction))
                 {
-                    MovePiece(currentSpace, nextSpace, direction);
+                    if (IsPushingBarrel(nextSpace))
+                    {
+                        Location nextBarrelSpace = GetNextSpace(nextSpace, direction);
+                        PushBarrel(nextBarrelSpace);
+                    }
+                    MovePiece(currentSpace, nextSpace);
                     RenderWorld(Map);
-                    Console.WriteLine(Score());
+                    Console.WriteLine(Score());    
+                }
+                else
+                {
+                    Console.Write("Bonk!");
                 }
             }
             Console.WriteLine("Congratulations, You win!");
