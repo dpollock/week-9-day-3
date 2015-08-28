@@ -25,19 +25,21 @@ namespace Sokoban.Console
            new [] { '#',' ','.','o',' ','#'},
            new [] { '#',' ',' ',' ','@','#'},
            new [] { '#','#','#','#','#','#'} };
-            // There isn't a rendered map yet, so the map is changed, from blank to initialize
+            // There isn't a rendered map yet, so the map is changed, from blank to initial draw.
             MapChanged = true;
             GameInProgress = true;
             do
             {
                 DrawMap();
-                if (Map.Any(x => x.Contains('o')))
-                {
+                //if (Map.Any(x => x.Contains('o')))
+                //{
+                //    Moves.GetUserInput();
+                //} else
+                //{
+                //    GameInProgress = false;
+                //}
+                if (GameInProgress)
                     Moves.GetUserInput();
-                } else
-                {
-                    GameInProgress = false;
-                }
             } while (GameInProgress);
             System.Console.WriteLine("Game over!");
             System.Console.ReadLine();
@@ -49,6 +51,7 @@ namespace Sokoban.Console
             if (!MapChanged)
                 return;
 
+            int barrelCount = 0;
             System.Console.Clear();
             for (int i = 0; i < Map.Length; i++)
             {
@@ -59,11 +62,15 @@ namespace Sokoban.Console
                         Moves.PlayersPosition[0] = i;
                         Moves.PlayersPosition[1] = j;
                     }
+                    if (Map[i][j] == 'o')
+                        barrelCount++;
                     System.Console.Write(Map[i][j]);
                 }
                 System.Console.WriteLine();
             }
             MapChanged = false;
+            if (barrelCount == 0)
+                GameInProgress = false;
         }
     }
 
