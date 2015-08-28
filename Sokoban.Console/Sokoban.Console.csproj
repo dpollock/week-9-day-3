@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ACEFCE22-9AF8-4B94-9EFE-8B2FD49ABE29}</ProjectGuid>
+    <ProjectGuid>{9F61A783-09CB-4B70-98AE-410A99BE1BF1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sokoban.Console</RootNamespace>
@@ -43,17 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsoleGameRender.cs" />
-    <Compile Include="Game.cs" />
-    <Compile Include="IGameRender.cs" />
-    <Compile Include="IInputHandler.cs" />
-    <Compile Include="IMapLoader.cs" />
-    <Compile Include="ConsoleInputHandler.cs" />
-    <Compile Include="Point.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tile.cs" />
-    <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
